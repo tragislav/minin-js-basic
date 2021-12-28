@@ -7,7 +7,13 @@ const person = {
 
 const op = new Proxy(person, {
     get(target, prop) {
-        console.log(`Getting prop ${prop}`);
+        // console.log(`Getting prop ${prop}`);
+        if (!(prop in target)) {
+            return prop
+                .split('_')
+                .map((p) => target[p])
+                .join(' ');
+        }
         return target[prop];
     },
     set(target, prop, value) {
@@ -55,6 +61,13 @@ const PersonProxy = new Proxy(Person, {
     construct(target, args) {
         console.log('construct...');
 
-        return new target(...args);
+        return new Proxy(new target(...args), {
+            get(t, prop) {
+                console.log(`Getting prop "${prop}"`);
+                return t[prop];
+            },
+        });
     },
 });
+
+const p = new PersonProxy('Tomas', 21);
